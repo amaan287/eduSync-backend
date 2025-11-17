@@ -34,8 +34,22 @@ export class CourseController {
 
   createCourse = asyncHandler(async (c: Context) => {
     const user = c.get('user');
-    const data = c.get('validatedData');
     const body = await c.req.parseBody();
+    
+    // Extract data from FormData
+    const data = {
+      title: body.title as string,
+      description: body.description as string,
+    };
+
+    // Validate required fields
+    if (!data.title || !data.description) {
+      return c.json({
+        success: false,
+        message: 'Title and description are required',
+      }, 400);
+    }
+
     const thumbnailFile = body.thumbnail as File | undefined;
 
     let thumbnailBuffer: Buffer | undefined;
@@ -55,8 +69,14 @@ export class CourseController {
   updateCourse = asyncHandler(async (c: Context) => {
     const user = c.get('user');
     const { id } = c.req.param();
-    const data = c.get('validatedData');
     const body = await c.req.parseBody();
+    
+    // Extract data from FormData
+    const data: any = {};
+    if (body.title) data.title = body.title as string;
+    if (body.description) data.description = body.description as string;
+    if (body.published !== undefined) data.published = body.published === 'true';
+
     const thumbnailFile = body.thumbnail as File | undefined;
 
     let thumbnailBuffer: Buffer | undefined;
